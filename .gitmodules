@@ -1,0 +1,3 @@
+[submodule "c_src/MySensors"]
+	path = c_src/MySensors
+	url = https://github.com/mysensors/MySensors.git

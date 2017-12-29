@@ -1,10 +1,10 @@
-diff --git a/hal/architecture/Linux/MyMainLinux.cpp b/hal/architecture/Linux/MyMainLinux.cpp
+diff --git a/c_src/MySensors/hal/architecture/Linux/MyMainLinux.cpp b/c_src/MySensors/hal/architecture/Linux/MyMainLinux.cpp
 index f67ea2f..fc0444b 100644
---- a/hal/architecture/Linux/MyMainLinux.cpp
-+++ b/hal/architecture/Linux/MyMainLinux.cpp
+--- a/c_src/MySensors/hal/architecture/Linux/MyMainLinux.cpp
++++ b/c_src/MySensors/hal/architecture/Linux/MyMainLinux.cpp
 @@ -412,7 +412,7 @@ int main(int argc, char *argv[])
  	}
- 
+
  	log_opts = LOG_CONS;
 -	if (foreground && isatty(STDIN_FILENO)) {
 +	if (foreground) {

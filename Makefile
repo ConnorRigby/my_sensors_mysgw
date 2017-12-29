@@ -3,7 +3,7 @@ CC ?= $(CROSSCOMPILER)-gcc
 CXX ?= $(CROSSCOMPILER)-g++
 MIX_TARGET ?= NULL
 
-MY_SENSORS_CONFIG=\
+MY_SENSORS_CONFIG=
 	--c_compiler=$(CC) \
 	--cxx_compiler=$(CXX) \
 	--my-transport=nrf24 \
@@ -23,18 +23,26 @@ MY_SENSORS_CONFIG +=\
 	--spi-driver="BCM"
 endif
 
-.PHONY: all
+MY_SENSORS_PATCHES := $(patsubst %.patch,%.patched,$(wildcard patches/my_sensors/*.patch))
 
-all: my_sensors_submodule my_sensors
+all: my_sensors
+
+%.patched:
+	git apply $(patsubst %.patched,%.patch,$@)
+	touch $@
 
 my_sensors_submodule:
-	git submodule update --init --recursive 
+	@[ "$(ls -A c_src/MySensors)" ] && : || git submodule update --init --recursive
 
-my_sensors:
-	./c_src/MySensors/configure $(MY_SENSORS_CONFIG)
-	make -f c_src/MySensors/Makefile
+my_sensors: my_sensors_submodule $(MY_SENSORS_PATCHES)
+	cd ./c_src/MySensors && ./configure $(MY_SENSORS_CONFIG) && make
 
-clean:
-	$(info Cleaning.)
-	rm -rf c_src/MySensors
-	rm -rf priv/my_sensors
+clean_my_sensors:
+	@cd ./c_src/MySensors && make clean
+
+clean_my_sensors_patches:
+	@cd ./c_src/MySensors && git stash && git stash drop ; :
+	rm patches/my_sensors/*.patched
+
+clean: clean_my_sensors clean_my_sensors_patches
+	@rm -rf priv/my_sensors

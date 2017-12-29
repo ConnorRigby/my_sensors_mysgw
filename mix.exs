@@ -1,11 +1,12 @@
-defmodule MySensorsTransportRpi.Mixfile do
+defmodule MySensors.MySGW.Mixfile do
   use Mix.Project
 
   def project do
     [
-      app: :my_sensors_transport_rpi,
-      compilers: [:elixir_make] ++ Mix.compilers,
+      app: :my_sensors_mysgw,
+      compilers: compilers(),
       make_clean: ["clean"],
+      make_env: %{"MIX_TARGET" => System.get_env("MIX_TARGET")},
       version: "0.1.0",
       elixir: "~> 1.5",
       start_permanent: Mix.env == :prod,
@@ -13,18 +14,25 @@ defmodule MySensorsTransportRpi.Mixfile do
     ]
   end
 
+  defp compilers do
+    case :init.get_plain_arguments() |> List.last() do
+      a when a in ['mix', 'compile', 'firmware', 'clean'] ->
+        [:elixir_make] ++ Mix.compilers
+      _ -> Mix.compilers
+    end
+  end
+
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      extra_applications: [:logger]
+      extra_applications: [:logger],
+      mod: {MySensors.MySGW.Application, []}
     ]
   end
 
-  # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
       {:elixir_make, "~> 0.4.0", runtime: false},
-      # {:my_sensors, "~> 0.1.0-rc1", runtime: false}
     ]
   end
 end

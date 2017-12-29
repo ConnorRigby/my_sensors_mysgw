@@ -1,21 +1,16 @@
-# MySensorsTransportRpi
+Elixir wrapper around [MySensors](https://github.com/mysensors/MySensors).
 
-**TODO: Add description**
-
-## Installation
-
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `my_sensors_transport_rpi` to your list of dependencies in `mix.exs`:
-
+# Usage
+To change the log level:
 ```elixir
-def deps do
-  [
-    {:my_sensors_transport_rpi, "~> 0.1.0"}
-  ]
-end
+use Mix.Config
+config my_sensors_mysgw: mysgw_log_level: :info
 ```
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/my_sensors_transport_rpi](https://hexdocs.pm/my_sensors_transport_rpi).
+or to disable:
+```elixir
+config my_sensors_mysgw: mysgw_log_level: false
+```
 
+# Status
+Currently only works for devices with a spidev Linux device, or rpi0 or rpi1

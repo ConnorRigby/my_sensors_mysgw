@@ -27,7 +27,7 @@ defmodule MySensors.MySGW do
       {:args, ["-d"]}
     ]
     port = Port.open({:spawn_executable, exe}, port_opts)
-    {:ok, port}
+    {:ok, %{port: port}}
   end
 
   def handle_info({_port, {:data, {:eol, data}}}, state) do

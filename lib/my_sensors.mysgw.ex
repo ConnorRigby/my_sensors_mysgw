@@ -1,64 +1,62 @@
 defmodule MySensors.MySGW do
   @moduledoc """
-  Wrapper around the Linux mysgw program.
+  Wraps `mysgw`.
   """
 
   use GenServer
   require Logger
+  alias MySensors.MySGW.Logger, as: MyLogger
 
-  @log_level Application.get_env(:my_sensors_mysgw, :mysgw_log_level, :debug)
+  @doc "Start the gateway manually."
+  def start_gw(%MyLogger{} = logger) do
+    default = [
+      eeprom_file: "/tmp/mysensors.eeprom",
+      config_file: "/tmp/mysensors.conf"
+    ]
+    env = Application.get_env(:my_sensors_mysgw, __MODULE__, [])
+    config = Keyword.merge(default, env)
+
+    config_file_contents = EEx.eval_file(config_template(), config)
+    :ok = File.write!(config[:config_file], config_file_contents)
+    MuonTrap.cmd(exe(), [], [into: logger, stderr_to_stdout: true])
+  end
 
   @doc false
-  def start_link do
-    GenServer.start_link(__MODULE__, [], [name: __MODULE__])
+  def start_link([]) do
+    GenServer.start_link(__MODULE__, default_logger(), [name: __MODULE__])
   end
 
-  def stop(reason \\ :normal) do
-    GenServer.stop(__MODULE__, reason)
+  @doc false
+  def init(%MyLogger{} = logger) do
+    pid = spawn_link(__MODULE__, :start_gw, [logger])
+    ref = Process.monitor(pid)
+    {:ok, {ref, pid}}
   end
 
-  def init([]) do
-    exe = Path.join([:code.priv_dir(:my_sensors_mysgw), "my_sensors/mysgw"])
-    port_opts = [
-      :binary,
-      :exit_status,
-      :stderr_to_stdout,
-      {:line, 255},
-      {:args, ["-d"]}
-    ]
-    port = Port.open({:spawn_executable, exe}, port_opts)
-    {:ok, %{port: port}}
+  @doc false
+  def handle_info({:DOWN, ref, :process, pid, reason}, {ref, pid}) do
+    {:stop, reason, {ref, pid}}
   end
 
-  def handle_info({_port, {:data, {:eol, data}}}, state) do
-    case @log_level do
-      :info ->
-        Logger.info data
-      :debug ->
-        Logger.debug data
-      _ -> :ok
-    end
-    {:noreply, state}
+  @doc false
+  def terminate(_, _) do
+    Logger.error("mysgw: exit")
   end
 
-  def handle_info({_, {:exit_status, status}}, state) do
-    {:stop, status, state}
+  @doc false
+  def default_logger do
+    lconfig = Application.get_env(:my_sensors_mysgw, MyLogger, [])
+    %MyLogger{
+      level: lconfig[:level] || :info,
+      meta: lconfig[:meta] || []
+    }
   end
 
-  def handle_info(info, state) do
-    {:stop, {:unexpected_info, info}, state}
+  defp exe do
+    Application.app_dir(:my_sensors_mysgw, ["priv", "my_sensors", "mysgw"])
   end
 
-  def terminate(reason, state) do
-    unless reason in [:normal, :shutdown] do
-      Logger.error "mysgw died: #{inspect reason}"
-    end
-    if state.port do
-      info = Port.info(state.port)
-      os_pid = Keyword.get(info, :os_pid)
-      if os_pid do
-        System.cmd("kill", ["15", "#{os_pid}"], into: IO.stream(:stdio, :line))
-      end
-    end
+  defp config_template do
+    Application.app_dir(:my_sensors_mysgw, ["priv", "mysensors.conf.eex"])
   end
 end

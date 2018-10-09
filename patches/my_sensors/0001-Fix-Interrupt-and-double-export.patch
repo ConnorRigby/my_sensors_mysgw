@@ -1,0 +1,98 @@
+From 0fa0ec300a20802def6a9c92d2abe5ed325d46a0 Mon Sep 17 00:00:00 2001
+From: connor rigby <konnorrigby@gmail.com>
+Date: Tue, 9 Oct 2018 08:43:02 -0700
+Subject: [PATCH 1/1] Fix SPIDEV interrupt and GPIO double export
+
+---
+ drivers/Linux/GPIO.cpp      | 22 +++++++++++++++-------
+ drivers/Linux/interrupt.cpp | 17 -----------------
+ 2 files changed, 15 insertions(+), 24 deletions(-)
+
+diff --git a/c_src/MySensors/drivers/Linux/GPIO.cpp b/c_src/MySensors/drivers/Linux/GPIO.cpp
+index 84e9f45..48d1f6e 100644
+--- a/c_src/MySensors/drivers/Linux/GPIO.cpp
++++ b/c_src/MySensors/drivers/Linux/GPIO.cpp
+@@ -20,6 +20,7 @@
+ #include "GPIO.h"
+ #include <dirent.h>
+ #include <stdio.h>
++#include <errno.h>
+ #include <stdlib.h>
+ #include <string.h>
+ #include <sys/types.h>
+@@ -110,19 +111,27 @@ GPIOClass::~GPIOClass()
+ 
+ void GPIOClass::pinMode(uint8_t pin, uint8_t mode)
+ {
+-	FILE *f;
+-
+ 	if (pin > lastPinNum) {
+ 		return;
+ 	}
+ 
+-	f = fopen("/sys/class/gpio/export", "w");
+-	fprintf(f, "%d\n", pin);
+-	fclose(f);
+-
++	FILE *f;
+ 	int counter = 0;
+ 	char file[128];
+ 	sprintf(file, "/sys/class/gpio/gpio%d/direction", pin);
++	
++	f = fopen(file, "r");
++	if(f != NULL) {
++		fclose(f);
++	} else {
++		f = fopen("/sys/class/gpio/export", "w");
++		if(f == NULL) {
++			logError("Could not export: %s\n", strerror(errno));
++		}
++		fprintf(f, "%d\n", pin);
++		fclose(f);
++		sleep(1);
++	}
+ 
+ 	while ((f = fopen(file,"w")) == NULL) {
+ 		// Wait 10 seconds for the file to be accessible if not open on first attempt
+@@ -140,7 +149,6 @@ void GPIOClass::pinMode(uint8_t pin, uint8_t mode)
+ 	}
+ 
+ 	exportedPins[pin] = 1;
+-
+ 	fclose(f);
+ }
+ 
+diff --git a/c_src/MySensors/drivers/Linux/interrupt.cpp b/c_src/MySensors/drivers/Linux/interrupt.cpp
+index 395c217..a0dc710 100644
+--- a/c_src/MySensors/drivers/Linux/interrupt.cpp
++++ b/c_src/MySensors/drivers/Linux/interrupt.cpp
+@@ -142,26 +142,9 @@ void attachInterrupt(uint8_t gpioPin, void (*func)(), uint8_t mode)
+ 		usleep(1000);
+ 	}
+ 
+-	// Export pin for interrupt
+-	if ((fd = fopen("/sys/class/gpio/export", "w")) == NULL) {
+-		logError("attachInterrupt: Unable to export pin %d for interrupt: %s\n", gpioPin, strerror(errno));
+-		exit(1);
+-	}
+-	fprintf(fd, "%d\n", gpioPin);
+-	fclose(fd);
+-
+ 	// Wait a bit the system to create /sys/class/gpio/gpio<GPIO number>
+ 	usleep(1000);
+ 
+-	snprintf(fName, sizeof(fName), "/sys/class/gpio/gpio%d/direction", gpioPin) ;
+-	if ((fd = fopen (fName, "w")) == NULL) {
+-		logError("attachInterrupt: Unable to open GPIO direction interface for pin %d: %s\n",
+-		         gpioPin, strerror(errno));
+-		exit(1) ;
+-	}
+-	fprintf(fd, "in\n") ;
+-	fclose(fd) ;
+-
+ 	snprintf(fName, sizeof(fName), "/sys/class/gpio/gpio%d/edge", gpioPin) ;
+ 	if ((fd = fopen(fName, "w")) == NULL) {
+ 		logError("attachInterrupt: Unable to open GPIO edge interface for pin %d: %s\n", gpioPin,
+-- 
+2.19.0
+

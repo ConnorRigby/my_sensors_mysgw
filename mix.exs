@@ -7,7 +7,7 @@ defmodule MySensors.MySGW.Mixfile do
       compilers: compilers(),
       make_clean: ["clean"],
       make_env: make_env(),
-      version: "0.2.0",
+      version: "0.3.0",
       elixir: "~> 1.4",
       description: "Elixir wrapper around [MySensors](https://github.com/mysensors/MySensors)",
       package: package(),
@@ -45,6 +45,10 @@ defmodule MySensors.MySGW.Mixfile do
     %{
       "MIX_TARGET" => config[:target] || System.get_env("MIX_TARGET") || "host",
       "MY_SENSORS_MYSGW_SPI_DEV" => config[:my_sensors_mysgw_spi_dev] || "/dev/spidev0.0",
+      "MY_SENSORS_MYSGW_IRQ_PIN" => config[:my_sensors_mysgw_irq_pin] || "",
+      "MY_SENSORS_MYSGW_CS_PIN"  => config[:my_sensors_mysgw_cs_pin]  || "",
+      "MY_SENSORS_MYSGW_CE_PIN"  => config[:my_sensors_mysgw_ce_pin]  || "",
+      
     }
   end
 

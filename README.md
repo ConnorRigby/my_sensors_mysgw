@@ -15,12 +15,7 @@ program as a `port`. See these threads for more info on this:
 
 ## Usage and Configuration
 ```elixir
-# set log level to :debug (default)
-config :my_sensors_mysgw, MySensors.MySGW.Logger, [
-  level: :debug
-]
-
-# Or disable logs
+# Disable logs
 config :my_sensors_mysgw, MySensors.MySGW.Logger, [
   level: false
 ]
@@ -62,4 +57,29 @@ def project do
       # ...
     ]
 end
+```
+
+### CS, CE, Interrupt
+You will probably need to configure your the pins outside of `spi_dev`.
+```elixir
+def project do
+    [
+      # ...
+      my_sensors_mysgw_spi_dev: "/dev/spidevStopCopyPastingThings",
+      my_sensors_mysgw_irq_pin: 9000,
+      my_sensors_mysgw_cs_pin:  9001,
+      my_sensors_mysgw_ce_pin:  9002,
+      # ...
+    ]
+end
+```
+
+## Usage with `my_sensors`
+If you are running `my_sensors` on the same device as `my_sensors_mysgw`:
+```elixir
+iex()> MySensors.Gateway.add_transport(MySensors.Transport.TCP, [])
+```
+otherwise:
+```elixir
+iex()> MySensors.Gateway.add_transport(MySensors.Transport.TCP, [host: 'nerves.local'])
 ```

@@ -89,6 +89,8 @@ MY_SENSORS_URL := https://github.com/mysensors/MySensors/archive/$(MY_SENSORS_SU
 
 all: $(MY_SGW)
 
+# Don't use git apply here.
+# https://stackoverflow.com/questions/24821431/git-apply-patch-fails-silently-no-errors-but-nothing-happens
 %.patched:
 	cd $(CWD) && patch -p1 < $(patsubst %.patched,%.patch,$@)
 	touch $@

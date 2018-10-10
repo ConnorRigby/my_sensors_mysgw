@@ -79,7 +79,7 @@ MY_SENSORS_CONFIG +=\
 endif
 
 MY_SGW := $(CWD)/priv/my_sensors/mysgw
-MY_SENSORS_PATCHES := $(patsubst %.patch,%.patched,$(wildcard patches/my_sensors/*.patch))
+MY_SENSORS_PATCHES := $(patsubst %.patch,%.patched,$(wildcard $(CWD)/patches/my_sensors/*.patch))
 MY_SENSORS_SUBMODULE_VERSION := 5d159a6c57209e9be91834b498d0072d3a1a25d6
 MY_SENOSRS_SUBMODULE := $(CWD)/c_src/MySensors
 MY_SENSORS_URL := https://github.com/mysensors/MySensors/archive/$(MY_SENSORS_SUBMODULE_VERSION).tar.gz
@@ -90,7 +90,7 @@ MY_SENSORS_URL := https://github.com/mysensors/MySensors/archive/$(MY_SENSORS_SU
 all: $(MY_SGW)
 
 %.patched:
-	git apply $(patsubst %.patched,%.patch,$@)
+	cd $(CWD) && patch -p1 < $(patsubst %.patched,%.patch,$@)
 	touch $@
 
 ifeq ($(shell if [ -d ".git" ]; then echo "git"; else echo "hex"; fi ), git)

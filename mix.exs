@@ -7,7 +7,7 @@ defmodule MySensors.MySGW.Mixfile do
       compilers: compilers(),
       make_clean: ["clean"],
       make_env: make_env(),
-      version: "2.4.0-beta",
+      version: "2.4.0-beta.3",
       elixir: "~> 1.5",
       description: "Elixir wrapper around [MySensors](https://github.com/mysensors/MySensors)",
       package: package(),

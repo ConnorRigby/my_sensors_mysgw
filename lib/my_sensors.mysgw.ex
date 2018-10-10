@@ -13,17 +13,18 @@ defmodule MySensors.MySGW do
       eeprom_file: "/tmp/mysensors.eeprom",
       config_file: "/tmp/mysensors.conf"
     ]
+
     env = Application.get_env(:my_sensors_mysgw, __MODULE__, [])
     config = Keyword.merge(default, env)
 
     config_file_contents = EEx.eval_file(config_template(), config)
     :ok = File.write!(config[:config_file], config_file_contents)
-    MuonTrap.cmd(exe(), [], [into: logger, stderr_to_stdout: true])
+    MuonTrap.cmd(exe(), [], into: logger, stderr_to_stdout: true)
   end
 
   @doc false
   def start_link([]) do
-    GenServer.start_link(__MODULE__, default_logger(), [name: __MODULE__])
+    GenServer.start_link(__MODULE__, default_logger(), name: __MODULE__)
   end
 
   @doc false
@@ -46,6 +47,7 @@ defmodule MySensors.MySGW do
   @doc false
   def default_logger do
     lconfig = Application.get_env(:my_sensors_mysgw, MyLogger, [])
+
     %MyLogger{
       level: lconfig[:level] || :info,
       meta: lconfig[:meta] || []

@@ -83,3 +83,11 @@ otherwise:
 ```elixir
 iex()> MySensors.Gateway.add_transport(MySensors.Transport.TCP, [host: 'nerves.local'])
 ```
+
+## Building this package
+The Makefile in this package requires `tar` and `wget` when building as a hex
+package. This is because the MySensors code is a submodule. PRs welcome.
+
+## License Information
+THe `MySensors` code is liscensed under GPLv2, the Elixir code is licensed under
+MIT.

@@ -1,7 +1,7 @@
 defmodule MySensors.MySGW.Logger do
   @moduledoc false
   alias MySensors.MySGW.Logger, as: MyLogger
-  defstruct [level: :debug, meta: [module: :my_sensors_mysgw]]
+  defstruct level: :debug, meta: [module: :my_sensors_mysgw]
 
   @doc false
   def log(%MyLogger{level: false}), do: :ok
@@ -18,10 +18,13 @@ defmodule MySensors.MySGW.Logger do
 
   def log(%MyLogger{} = logger, {:cont, [msg | rest]}) do
     case decode(msg) do
-      {level, msg} -> 
+      {level, msg} ->
         :ok = Logger.bare_log(level, String.trim(msg), logger.meta)
-      _ -> :ok
+
+      _ ->
+        :ok
     end
+
     log(logger, {:cont, rest})
   end
 

@@ -1,3 +1,7 @@
+# 2.4.0-beta
+* Change version number to match tracking/MySensors
+* Update license information
+
 # 0.3.0
 * Update to MySensors 2.4.0-beta
   * [Add temp patch](https://github.com/mysensors/MySensors/pull/1211)

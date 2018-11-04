@@ -47,10 +47,18 @@ defmodule MySensors.MySGW.Mixfile do
 
     %{
       "MIX_TARGET" => config[:target] || System.get_env("MIX_TARGET") || "host",
-      "MY_SENSORS_MYSGW_SPI_DEV" => config[:my_sensors_mysgw_spi_dev] || "/dev/spidev0.0",
-      "MY_SENSORS_MYSGW_IRQ_PIN" => config[:my_sensors_mysgw_irq_pin],
-      "MY_SENSORS_MYSGW_CS_PIN" => config[:my_sensors_mysgw_cs_pin],
-      "MY_SENSORS_MYSGW_CE_PIN" => config[:my_sensors_mysgw_ce_pin]
+      "MY_SPIDEV_DEVICE" => config[:my_sensors_spidev_device],
+      "MY_TRANSPORT" => config[:my_sensors_transport],
+      "MY_SENSORS_IRQ_PIN" => config[:my_sensors_irq_pin],
+      "MY_SENSORS_CS_PIN" => config[:my_sensors_cs_pin],
+      "MY_SENSORS_CE_PIN" => config[:my_sensors_ce_pin],
+      "MY_SENSORS_ERR_LED_PIN" => config[:my_sensors_err_led_pin],
+      "MY_SENSORS_RX_LED_PIN" => config[:my_sensors_rx_led_pin],
+      "MY_SENSORS_TX_LED_PIN" => config[:my_sensors_tx_led_pin],
+      "MY_RF24_PA_LEVEL" => config[:my_sensors_rf24_pa_level] || "RF24_PA_LOW",
+      "MY_IS_RFM69HW" => config[:my_sensors_rfm69hw],
+      "MY_LEDS" => config[:my_sensors_leds],
+      "MY_LEDS_INVERSE" => config[:my_sensors_leds_inverse]
     }
   end
 

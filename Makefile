@@ -160,25 +160,25 @@ all: $(MY_SGW)
 
 ifeq ($(shell if [ -d ".git" ]; then echo "git"; else echo "hex"; fi ), git)
 # If the .git dir exists, this was a git clone
-$(MY_SENOSRS_SUBMODULE):
-	@[ "$(ls -A $(MY_SENOSRS_SUBMODULE))" ] && : || git submodule update --init --recursive
+$(MY_SENSORS_SUBMODULE):
+	@[ "$(ls -A $(MY_SENSORS_SUBMODULE))" ] && : || git submodule update --init --recursive
 
 else
 
 # if not, this is a hex package (probably)
-$(MY_SENOSRS_SUBMODULE):
+$(MY_SENSORS_SUBMODULE):
 	mkdir -p c_src/
 	wget $(MY_SENSORS_URL) -O - | tar -xz -C c_src/
 	cd c_src/MySensors-$(MY_SENSORS_SUBMODULE_VERSION) && git init . && git add . && git commit -am "Fake"
-	mv c_src/MySensors-$(MY_SENSORS_SUBMODULE_VERSION) $(MY_SENOSRS_SUBMODULE)
+	mv c_src/MySensors-$(MY_SENSORS_SUBMODULE_VERSION) $(MY_SENSORS_SUBMODULE)
 
 endif
 
-$(MY_SGW): $(MY_SENOSRS_SUBMODULE) $(MY_SENSORS_PATCHES)
-	cd $(MY_SENOSRS_SUBMODULE) && ./configure $(MY_SENSORS_CONFIG) && make
+$(MY_SGW): $(MY_SENSORS_SUBMODULE) $(MY_SENSORS_PATCHES)
+	cd $(MY_SENSORS_SUBMODULE) && ./configure $(MY_SENSORS_CONFIG) && make
 
 clean_my_sensors_patches:
-	@cd $(MY_SENOSRS_SUBMODULE) && git stash && git stash drop ; :
+	@cd $(MY_SENSORS_SUBMODULE) && git stash && git stash drop ; :
 	rm -f patches/my_sensors/*.patched
 
 clean: clean_my_sensors_patches

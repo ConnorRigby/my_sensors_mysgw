@@ -9,7 +9,7 @@ $(info using default spi device $(MY_SPIDEV_DEVICE))
 endif
 
 ifeq ($(MY_TRANSPORT), )
-$(error MY_TRANSPORT required)
+$(warn MY_TRANSPORT required)
 endif
 
 MY_SENSORS_CONFIG=\
@@ -77,7 +77,9 @@ MY_LEDS_CONFIG=\
 	--my-leds-tx-pin=$(MY_SENSORS_TX_LED_PIN)
 
 ifeq ($(MY_LEDS),$(filter $(MY_LEDS),true))
+$(info enabling LEDS)
 ifeq ($(MY_LEDS_INVERSE),$(filter $(MY_LEDS_INVERSE),true))
+$(info inverting leds)
 MY_LEDS_CONFIG+=--my-leds-blinking-inverse
 endif
 MY_SENSORS_CONFIG += $(MY_LEDS_CONFIG)
@@ -126,7 +128,7 @@ MY_SENSORS_CONFIG +=\
 endif
 
 MY_SGW := $(CWD)/priv/my_sensors/mysgw
-MY_SENSORS_PATCHES := $(patsubst %.patch,%.patched,$(wildcard patches/my_sensors/*.patch))
+# MY_SENSORS_PATCHES := $(patsubst %.patch,%.patched,$(wildcard patches/my_sensors/*.patch))
 MY_SENSORS_SUBMODULE := c_src/MySensors
 
 .PHONY: all clean clean_my_sensors_patches my_sensors

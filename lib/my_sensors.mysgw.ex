@@ -16,7 +16,7 @@ defmodule MySensors.MySGW do
 
     env = Application.get_env(:my_sensors_mysgw, __MODULE__, [])
     config = Keyword.merge(default, env)
-
+    logger = IO.stream(:stdio, :line)
     config_file_contents = EEx.eval_file(config_template(), config)
     :ok = File.write!(config[:config_file], config_file_contents)
     MuonTrap.cmd(exe(), [], into: logger, stderr_to_stdout: true)

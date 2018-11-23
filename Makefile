@@ -12,20 +12,6 @@ ifeq ($(MY_TRANSPORT), )
 $(warn MY_TRANSPORT required)
 endif
 
-ifeq ($(MY_SENSORS_MYSGW_IRQ_PIN),)
-else
-MY_SENSORS_PIN_CONFIG += --my-rf24-irq-pin=$(MY_SENSORS_MYSGW_IRQ_PIN)
-endif
-
-ifeq ($(MY_SENSORS_MYSGW_CS_PIN),)
-else
-MY_SENSORS_PIN_CONFIG += --my-rf24-cs-pin=$(MY_SENSORS_MYSGW_CS_PIN)
-endif
-
-ifeq ($(MY_SENSORS_MYSGW_CE_PIN),)
-else
-MY_SENSORS_PIN_CONFIG += --my-rf24-ce-pin=$(MY_SENSORS_MYSGW_CE_PIN)
-endif
 
 MY_SENSORS_CONFIG=\
 	--c_compiler=$(CC) \
@@ -38,28 +24,19 @@ MY_SENSORS_CONFIG=\
 	--my-signing=none \
 	--bin-dir=$(CWD)/priv/my_sensors \
 	--build-dir=$(CWD)/_build/my_sensors \
-	--prefix=$(CWD)/priv/my_sensors \
-	$(MY_SENSORS_PIN_CONFIG)
+	--no_init_system \
+	--prefix=$(CWD)/priv/my_sensors
 
+# RF24
+ifeq ($(MY_TRANSPORT),$(filter $(MY_TRANSPORT),rf24))
 MY_RF24_CONFIG=\
 	--my-transport=rf24 \
 	--my-rf24-irq-pin=$(MY_SENSORS_IRQ_PIN) \
 	--my-rf24-cs-pin=$(MY_SENSORS_CS_PIN) \
 	--my-rf24-ce-pin=$(MY_SENSORS_CE_PIN)
 
-MY_RFM69_CONFIG=\
-	--my-transport=rfm69 \
-	--my-rfm69-irq-pin=$(MY_SENSORS_IRQ_PIN) \
-	--my-rfm69-cs-pin=$(MY_SENSORS_CS_PIN)
+$(info Using RF24 transport: $(MY_RF24_CONFIG))
 
-MY_RFM95_CONFIG=\
-	--my-transport=rfm95 \
-	--my-rfm95-irq-pin=$(MY_SENSORS_IRQ_PIN) \
-	--my-rfm95-cs-pin=$(MY_SENSORS_CS_PIN)
-
-# RF24
-ifeq ($(MY_TRANSPORT),$(filter $(MY_TRANSPORT),rf24))
-$(info Using RF24 transport)
 ifeq ($(MY_RF24_PA_LEVEL),$(filter $(MY_RF24_PA_LEVEL),RF24_PA_MAX))
 $(info Using RF24_PA_MAX)
 MY_RF24_CONFIG += --my-rf24-pa-level=RF24_PA_MAX
@@ -72,8 +49,16 @@ MY_SENSORS_CONFIG += $(MY_RF24_CONFIG)
 
 # RFM69
 else ifeq ($(MY_TRANSPORT),$(filter $(MY_TRANSPORT),rfm69))
-$(info Using RFM69 transport)
-ifeq ($(MY_IS_RFM69HW),$(filter $(MY_IS_RFM69HW),true))
+MY_RFM69_CONFIG=\
+	--my-transport=rfm69 \
+	--my-rfm69-irq-pin=$(MY_SENSORS_IRQ_PIN) \
+	--my-rfm69-cs-pin=$(MY_SENSORS_CS_PIN)
+
+$(info Using RFM69 transport $(MY_RFM69_CONFIG))
+
+ifeq ($(MY_IS_RFM69HW),true)
+$(info Enabling RFM69HW)
+
 MY_RFM69_CONFIG += --my-is-rfm69hw
 endif
 MY_SENSORS_CONFIG += $(MY_RFM69_CONFIG)
@@ -81,20 +66,25 @@ MY_SENSORS_CONFIG += $(MY_RFM69_CONFIG)
 
 # RFM95
 else ifeq ($(MY_TRANSPORT),$(filter $(MY_TRANSPORT),rfm95))
-$(info Using RFM95 transport)
+MY_RFM95_CONFIG=\
+	--my-transport=rfm95 \
+	--my-rfm95-irq-pin=$(MY_SENSORS_IRQ_PIN) \
+	--my-rfm95-cs-pin=$(MY_SENSORS_CS_PIN)
+
+$(info Using RFM95 transport $(MY_RFM95_CONFIG))
 MY_SENSORS_CONFIG += $(MY_RFM95_CONFIG)
 # RFM85
 endif
 # TRANSPORT
 
+ifeq ($(MY_LEDS),true)
+$(info enabling LEDS: $(MY_LEDS))
 MY_LEDS_CONFIG=\
 	--my-leds-err-pin=$(MY_SENSORS_ERR_LED_PIN) \
 	--my-leds-rx-pin=$(MY_SENSORS_RX_LED_PIN) \
 	--my-leds-tx-pin=$(MY_SENSORS_TX_LED_PIN)
 
-ifeq ($(MY_LEDS),$(filter $(MY_LEDS),true))
-$(info enabling LEDS)
-ifeq ($(MY_LEDS_INVERSE),$(filter $(MY_LEDS_INVERSE),true))
+ifeq ($(MY_LEDS_INVERSE),true)
 $(info inverting leds)
 MY_LEDS_CONFIG+=--my-leds-blinking-inverse
 endif
